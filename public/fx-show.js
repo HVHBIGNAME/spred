@@ -57,7 +57,7 @@
     if (!column) return;
     const columnCtx = column.getContext('2d');
     const gradient = columnCtx.createLinearGradient(0, 63, 0, 0);
-    gradient.addColorStop(0, rgba(0.58));
+    gradient.addColorStop(0, rgba(0.4));
     gradient.addColorStop(0.22, rgba(0.35));
     gradient.addColorStop(1, rgba(0));
     columnCtx.clearRect(0, 0, 4, 64);
@@ -145,8 +145,8 @@
       const age = (now - ring.start) / 700;
       if (age >= 1) { rings.splice(i, 1); continue; }
       const inset = Math.min(width, height) * 0.018 + age * Math.min(width, height) * 0.018;
-      ctx.strokeStyle = rgba(ring.power * .25 * (1 - age));
-      ctx.lineWidth = 1.5 + ring.power * 1.5;
+      ctx.strokeStyle = rgba(ring.power * .12 * (1 - age));
+      ctx.lineWidth = 1 + ring.power;
       roundedRect(inset, inset, width - inset * 2, height - inset * 2, 18);
       ctx.stroke();
     }
