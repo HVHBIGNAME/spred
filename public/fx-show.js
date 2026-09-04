@@ -145,8 +145,8 @@
       const age = (now - ring.start) / 700;
       if (age >= 1) { rings.splice(i, 1); continue; }
       const inset = Math.min(width, height) * 0.018 + age * Math.min(width, height) * 0.018;
-      ctx.strokeStyle = rgba(ring.power * .12 * (1 - age));
-      ctx.lineWidth = 1 + ring.power;
+      ctx.strokeStyle = rgba(ring.power * .26 * (1 - age));
+      ctx.lineWidth = 2 + ring.power * 1.4;
       roundedRect(inset, inset, width - inset * 2, height - inset * 2, 18);
       ctx.stroke();
     }
@@ -213,7 +213,7 @@
     if (rings.length >= maxRings) rings.shift();
     rings.push({ start: performance.now(), power: clamp(power, 0, 1) });
     flashes.push({ start: performance.now(), x: x * width, y: y * height, power: clamp(power, 0, 1), duration: 260, strobe: false });
-    if (power > .72) flashes.push({ start: performance.now(), x: width / 2, y: height / 2, power: 1, duration: 60, strobe: true });
+    if (power > .58) flashes.push({ start: performance.now(), x: width / 2, y: height / 2, power: 1, duration: 60, strobe: true });
   };
   window.SpredFx.onCut = ({ x = .5, y = .5, hue: nextHue } = {}) => {
     if (Number.isFinite(nextHue)) hue = nextHue;
