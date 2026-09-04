@@ -1,0 +1,6 @@
+name = "spred"
+compatibility_date = "2026-09-01"
+
+[assets]
+directory = "./public"
+not_found_handling = "404-page"

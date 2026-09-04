@@ -1,0 +1,9 @@
+# dev & source (не в репозитории)
+_dev/
+source.mp4
+source.f*.mp4
+seg*.mp4
+*.log
+
+# node
+node_modules/
