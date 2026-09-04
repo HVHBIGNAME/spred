@@ -3,6 +3,7 @@
   --bg:#05030a; --pink:#ff3ec8; --cyan:#3ee6ff; --amber:#ffd34d;
   --ink:#f6f2ff; --muted:rgba(246,242,255,.66); --line:rgba(255,255,255,.14);
   --mono:'JetBrains Mono',monospace; --body:'Manrope',sans-serif; --display:'Unbounded',sans-serif;
+  --acc:var(--pink);
   --ease:cubic-bezier(.16,1,.3,1);
 }
 *{box-sizing:border-box}
@@ -16,7 +17,7 @@ body{overflow:hidden}
 .band.run{opacity:.9;animation:bandpass 520ms var(--ease)}
 @keyframes bandpass{0%{top:-2%}100%{top:102%}}
 
-.layout{position:relative;z-index:4;height:100svh;max-width:1560px;margin:0 auto;padding:0 clamp(20px,3vw,54px);display:flex;flex-direction:column}
+.layout{position:relative;z-index:4;height:100svh;max-width:1560px;margin:0 auto;padding:0 clamp(24px,3vw,54px);display:flex;flex-direction:column}
 .topbar{height:74px;display:flex;align-items:center;justify-content:space-between;flex:none}
 .brand-code,.control,.eyebrow,.subline,.mono-label,.progress-row,.gate-sub,.gate-foot{font-family:var(--mono)}
 .brand-code{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
@@ -63,7 +64,7 @@ h1.punch{filter:brightness(1.6) saturate(1.2)}
 .right{display:flex;flex-direction:column;align-items:center;min-width:0}
 .stagebox{position:relative;width:100%;max-height:calc(100svh - 210px);aspect-ratio:16/9;border-radius:10px;overflow:hidden;
   background:#000;border:1px solid rgba(255,255,255,.12);
-  box-shadow:0 0 0 1px rgba(255,255,255,.05)}
+  box-shadow:0 0 0 1px rgba(255,255,255,.05),0 0 18px rgba(255,62,200,.1)}
 .stagebox .video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 500ms ease;transform-origin:50% 50%}
 .stagebox .video.ready{opacity:1}
 .reflect{position:relative;width:100%;aspect-ratio:16/4.6;margin-top:2px;overflow:hidden;
@@ -85,23 +86,26 @@ h1.punch{filter:brightness(1.6) saturate(1.2)}
   radial-gradient(90% 80% at 12% 88%,rgba(62,230,255,.13),transparent 55%),
   linear-gradient(180deg,rgba(2,1,6,.94),rgba(2,1,6,.9)),
   url('assets/poster.jpg') center/cover;filter:blur(26px) saturate(.8) brightness(.55)}
-.gate-stage{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center}
-.gate .eyebrow{margin-bottom:clamp(16px,2.6vh,26px);font-size:clamp(9px,1vw,11px);color:var(--muted)}
-.gate h2{margin:0;font:900 clamp(4.4rem,15vw,10.5rem)/.92 var(--display);letter-spacing:-.07em;text-shadow:0 0 70px rgba(255,62,200,.4)}
+.gate-stage{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;text-align:center}
+.gate .eyebrow{margin-bottom:clamp(16px,2.6vh,26px);font-size:clamp(11px,1vw,13px);letter-spacing:.1em;color:rgba(246,242,255,.78)}
+.gate h2{margin:0;font:900 clamp(4.4rem,13vw,10.5rem)/.92 var(--display);letter-spacing:-.07em;
+  text-shadow:0 0 5px rgba(255,255,255,.22),0 0 18px rgba(255,62,200,.28)}
 .gate-sub{margin:clamp(14px,2.2vh,24px) 0 clamp(26px,5vh,46px);font-size:clamp(11px,1.2vw,14px);letter-spacing:.24em;text-transform:uppercase;color:var(--muted)}
 .play-circle{width:clamp(86px,11vh,112px);height:clamp(86px,11vh,112px);border-radius:50%;border:1px solid rgba(255,255,255,.25);cursor:pointer;
-  background:radial-gradient(circle at 32% 28%,#ff7ad9,var(--pink) 55%,#c2188f);
-  box-shadow:0 0 0 8px rgba(255,62,200,.12),0 0 50px rgba(255,62,200,.55);display:flex;align-items:center;justify-content:center;
+  background:transparent;
+  box-shadow:0 0 0 1px var(--pink),0 0 8px rgba(255,62,200,.5),inset 0 0 8px rgba(255,62,200,.16);display:flex;align-items:center;justify-content:center;
   animation:gatepulse .357s var(--ease) infinite}
 @keyframes gatepulse{0%,100%{transform:scale(1)}50%{transform:scale(1.045)}}
-.play-circle svg{width:32%;height:32%;margin-left:6%;fill:#0a0410}
+.play-circle svg{width:32%;height:32%;margin-left:6%;fill:var(--pink);filter:drop-shadow(0 0 3px var(--pink))}
 .play-circle:focus-visible{outline:2px solid var(--cyan);outline-offset:4px}
-.gate .silent{margin-top:24px;background:none;border:none;cursor:pointer;color:var(--muted);font-size:11px;letter-spacing:.18em;text-transform:uppercase;padding:6px 2px;border-bottom:1px solid transparent;transition:color 150ms ease,border-color 150ms ease}
-.gate .silent:hover{color:var(--ink);border-color:var(--pink)}
-.gate-foot{position:absolute;bottom:calc(16px + env(safe-area-inset-bottom));left:0;right:0;text-align:center;font-size:9.5px;color:#a29bbf}
+.gate .silent{margin-top:24px;background:transparent;border:1px solid rgba(246,242,255,.38);cursor:pointer;color:rgba(246,242,255,.78);font:600 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:13px 16px;transition:color 150ms ease,border-color 150ms ease,background 150ms ease}
+.gate .silent:hover{color:var(--ink);border-color:var(--pink);background:rgba(255,62,200,.08)}
+.gate-foot{position:absolute;bottom:calc(16px + env(safe-area-inset-bottom));left:0;right:0;text-align:center;font-size:10px;line-height:1.5;color:rgba(246,242,255,.72);z-index:1}
+.gate::after{content:'';position:absolute;left:0;right:0;bottom:0;height:17%;pointer-events:none;background:linear-gradient(180deg,transparent,rgba(0,0,0,.72))}
 .gate.is-leaving{opacity:0;transform:scale(1.05);pointer-events:none}
-@media(min-width:961px){
-  .gate-stage{align-items:flex-start;text-align:left;margin-left:clamp(50px,11vw,200px)}
+@media(min-width:1101px){
+  .gate-stage{align-items:flex-start;text-align:left;width:min(calc(100% - 48px),560px);margin:0 auto}
+  .gate .eyebrow,.gate h2,.gate-sub{width:100%}
   .gate .silent{align-self:flex-start}
 }
 
@@ -147,8 +151,8 @@ h1.punch{filter:brightness(1.6) saturate(1.2)}
 .sweep.on{opacity:.95;animation:sweep .6s linear}
 @keyframes sweep{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 @media(max-width:1100px){
-  .hero{grid-template-columns:1fr;grid-template-rows:minmax(0,44svh) auto;gap:16px;align-content:center}
-  .right{order:-1}
+  .hero{grid-template-columns:1fr;grid-template-rows:minmax(0,44svh) auto;gap:10px;align-content:center}
+  .right{order:-1;width:min(100%,820px);margin:0 auto}
   .stagebox{max-height:44svh}
   h1{font-size:clamp(3rem,15vw,5.6rem);justify-content:center}
   .left{align-items:center;text-align:center}
