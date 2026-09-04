@@ -35,6 +35,7 @@ body{overflow:hidden}
 /* FX-слои */
 #fx{z-index:1;pointer-events:none}
 .flash{z-index:2;pointer-events:none;opacity:0;transition:opacity 300ms ease-out}
+#show{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none}
 .glitch{z-index:3;pointer-events:none;opacity:0;mix-blend-mode:screen;
   background:linear-gradient(transparent 0 24%,rgba(255,255,255,.12) 24.5% 25.5%,transparent 26% 71%,rgba(255,255,255,.12) 71.5% 72.5%,transparent 73%)}
 .glitch.run{opacity:.6;animation:glitch-shift 140ms steps(2,end)}
@@ -191,4 +192,22 @@ footer b{color:var(--pink);font-weight:400}
 }
 @media(max-width:420px){
   .dock .channel{font-size:9.5px;padding:0 4px;letter-spacing:.06em}
+}
+
+/* ---------- v4: рейв-режим ---------- */
+h1 span{transform-origin:50% 100%;will-change:transform}
+h1.live span{animation:none!important}
+.ticker{position:absolute;z-index:4;left:0;right:0;bottom:0;height:26px;overflow:hidden;
+  border-top:1px solid rgba(255,62,200,.35);background:rgba(4,2,8,.82);
+  display:flex;align-items:center;pointer-events:none}
+.ticker-in{display:flex;white-space:nowrap;animation:ticker-scroll 26s linear infinite;will-change:transform}
+.ticker span{font:600 10px/26px var(--mono);letter-spacing:.22em;text-transform:uppercase;
+  color:var(--amber);text-shadow:0 0 8px rgba(255,211,77,.65);padding-right:8px}
+@keyframes ticker-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.dock{bottom:clamp(52px,7vh,66px)}
+footer{bottom:42px}
+@media(max-width:700px){
+  .ticker{height:22px}
+  .ticker span{font-size:8px;line-height:22px}
+  .dock{bottom:30px}
 }
