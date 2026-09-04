@@ -21,9 +21,9 @@
   let running = false, hue = 330, targetHue = 330, prevTarget = 330;
   let avgCol = [255, 62, 200];
   let audio = null, analyser = null, freq = null, audioDead = false, silenceSince = 0;
-  let env = 0, kick = 0, impact = 0, shakeK = 0, transK = 0, lastRms = .3;
+  let env = 0, kick = 0, impact = 0, shakeK = 0, transK = 0, flashK = 0, lastRms = .3;
   let mMotion = 0, danceS = 0, scatT = -9, scatA = 40;
-  let lastSample = 0, lastLuma = 0, prevPix = null, lastCut = -9, cdShow = 0, cdT = -9, bgT = 0;
+  let lastSample = 0, lastLuma = 0, lSlow = 0, lastFlash = -Infinity, prevPix = null, lastCut = -9, cdShow = 0, cdT = -9, bgT = 0;
   let mouse = { x: .5, y: .5, gx: .5, gy: .5 };
   const popT = new Array(L).fill(-9), popA = new Array(L).fill(0);
   const parts = [], waves = [], irises = [], stars = [];
@@ -163,6 +163,21 @@
     $('#progressBar').style.width = `${video.currentTime / d * 100}%`;
     $('#currentTime').textContent = fmt(video.currentTime);
   });
+  video.addEventListener('ended', () => {
+    running = false;
+    video.pause(); mirror.pause();
+    document.body.classList.add('ended');
+    title.classList.remove('live');
+    $('#restartBtn').focus();
+  });
+  $('#restartBtn').addEventListener('click', async () => {
+    document.body.classList.remove('ended');
+    title.classList.add('live');
+    [...title.children].forEach(el => { el.style.transform = ''; el.style.opacity = ''; el.style.filter = ''; });
+    video.currentTime = 0; mirror.currentTime = 0; bi = 0; lastT = -1; running = true;
+    initAudio();
+    try { if (audio && audio.state === 'suspended') await audio.resume(); await video.play(); await mirror.play(); } catch (e) {}
+  });
 
   let lastPeakAt = 0;
   function spawnParts(b, strength) {
@@ -196,9 +211,13 @@
     const down = downSet.has(idx), drop = dropSet.has(idx);
     let ramp = 0;
     if (TL) for (const [s, e] of TL.builds) { if (idx >= s && idx < e) { ramp = (idx - s) / (e - s); break; } }
-    kick = 1;
+    const dur = video.duration || (TL && TL.duration) || 175;
+    const loud = lastRms;
+    const silent = TL && loud < .16;
+    const tailEnd = dur && bt > dur - 22;
+    kick = drop ? 1 : clamp(.2 + loud, 0, 1);
     const strength = clamp(.45 + lastRms * .6 + ramp * .25, 0, 1);
-    const baseAmp = drop ? 30 : down ? 15 : 4 + ramp * 8;
+    const baseAmp = drop ? 30 : (tailEnd ? 0 : down ? (loud > .25 ? 15 : (loud >= .12 ? 6 : 0)) : (loud > .25 ? 4 + ramp * 8 : 0));
     for (let i = 0; i < L; i++) { popA[i] = baseAmp; popT[i] = performance.now() + i * 24; }
     if (drop) {
       console.log('DROP@', Math.round(bt * 10) / 10);
@@ -241,6 +260,10 @@
       }
     }
     l /= 2304;
+    lSlow += (l - lSlow) * .06;
+    if (l > .72 && l - lSlow > .22 && now - lastFlash > 1600) {
+      flashK = 1; lastFlash = now; shakeK = Math.max(shakeK, .12);
+    }
     if (sn) { avgCol = [sr / sn * 255, sg / sn * 255, sb / sn * 255]; }
     if (prevPix) {
       let d = 0;
@@ -284,7 +307,7 @@
     const t = video.currentTime;
     if (running && !video.paused) fireDue(t);
     audioBands(now);
-    kick *= .78; impact *= .9; shakeK *= .82; transK *= .9;
+    kick *= .78; impact *= .9; shakeK *= .82; transK *= .9; flashK *= .82;
     const dur = video.duration || 175;
     const outro = running ? clamp((dur - t) / P.outroSec, 0, 1) : 0;
     const quiet = env < P.calmAt ? env / P.calmAt : 1;
@@ -298,7 +321,7 @@
     // фон: реальный средний цвет кадра + акцент
     if (now - bgT > 90) {
       bgT = now;
-      ambient.style.background = `radial-gradient(55% 55% at 50% 50%, rgba(${avg},${.07 + B.energy * .06 + imp * .06 + transK * .05}), transparent 70%)`;
+      ambient.style.background = `radial-gradient(55% 55% at 50% 50%, rgba(${avg},${.07 + B.energy * .06 + imp * .06 + transK * .05 + flashK * .5}), transparent 70%)`;
       ambient.style.opacity = String(.35 * (0.4 + act));
       ambient.style.transform = `translate3d(${Math.sin(now * .00012) * 4}%, ${Math.cos(now * .00009) * 3}%, 0) scale(${1 + B.bass * .12 + imp * .18})`;
       mglow.style.background = `radial-gradient(13% 13% at ${mouse.gx * 100}% ${mouse.gy * 100}%, rgba(${hueRgb},${.05 + B.energy * .03}), transparent 70%)`;
@@ -323,12 +346,12 @@
     const shY = shBase > .15 ? (Math.random() - .5) * shBase : 0;
     const rotJ = danceS > .8 ? (Math.random() - .5) * .15 : 0;
     box.style.transform = `translate3d(${shX}px, ${shY + bobY}px, 0) rotateX(${rx + floatY}deg) rotateY(${ry + floatX}deg) rotateZ(${rotZ + rotJ}deg) scale(${bassScale})`;
-    const screenShake = imp * 6;
-    if (screenShake > .4) layout.style.transform = `translate3d(${(Math.random() - .5) * screenShake}px, ${(Math.random() - .5) * screenShake * .8}px, 0) scale(${1 + transK * .008})`;
-    else layout.style.transform = transK > .01 ? `scale(${1 + transK * .008})` : '';
+    const screenShake = imp * 6 + flashK * 2;
+    if (screenShake > .4) layout.style.transform = `translate3d(${(Math.random() - .5) * screenShake}px, ${(Math.random() - .5) * screenShake * .8}px, 0) scale(${1 + transK * .008 + flashK * .006})`;
+    else layout.style.transform = transK > .01 || flashK > .01 ? `scale(${1 + transK * .008 + flashK * .006})` : '';
 
-    const glowA = (.08 + B.energy * .07 + k * .2 + imp * .2) * act;
-    box.style.boxShadow = `0 0 0 1px rgba(255,255,255,.1), 0 0 ${14 + k * 42 + imp * 90}px ${4 + k * 12 + imp * 18}px ${hslS(hue, (.18 + k * .28 + imp * .28) * act)}, 0 ${6 + imp * 14}px ${38 + k * 62}px -10px rgba(${avg},${glowA * .5})`;
+    const glowA = (.08 + B.energy * .07 + k * .2 + imp * .2 + flashK * .5) * act;
+    box.style.boxShadow = `0 0 ${flashK * 70}px ${flashK * 20}px rgba(255,255,255,${flashK * .55 * act}), 0 0 0 1px rgba(255,255,255,.1), 0 0 ${14 + k * 42 + imp * 90}px ${4 + k * 12 + imp * 18}px ${hslS(hue, (.18 + k * .28 + imp * .28) * act)}, 0 ${6 + imp * 14}px ${38 + k * 62}px -10px rgba(${avg},${glowA * .5})`;
     mirror.style.opacity = String((.18 + B.energy * .08 + k * .15 + imp * .12) * act);
 
     ctx.clearRect(0, 0, innerWidth, innerHeight);
@@ -372,6 +395,15 @@
       ctx.strokeStyle = `rgba(${hueRgb},${(w.big ? .5 : .25) * (1 - pr) * act})`; ctx.lineWidth = (w.big ? 3 : 1.4) + 6 * (1 - pr);
       ctx.strokeRect(b.left - (rr - b.width / 2), b.top - (rr - b.height / 2), rr * 2, rr * 2);
     }
+    if (flashK > .02) {
+      const cx = b.left + b.width / 2, cy = b.top + b.height / 2;
+      const fg = ctx.createRadialGradient(cx, cy, 0, cx, cy, b.width * (.35 + (1 - flashK) * 1.1));
+      fg.addColorStop(0, `rgba(255,255,255,${flashK * .4 * act})`);
+      fg.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.fillStyle = fg; ctx.fillRect(0, 0, innerWidth, innerHeight);
+      ctx.globalCompositeOperation = 'source-over';
+    }
     ctx.globalCompositeOperation = 'lighter';
     for (let i = parts.length - 1; i >= 0; i--) {
       const s = parts[i]; s.x += s.vx; s.y += s.vy; s.vy += .05; s.life -= .022;
@@ -412,7 +444,7 @@
         if (scatOn > 0) dx = (i - (L - 1) / 2) * scatA * scatOn * (i % 2 ? 1 : .8);
         el.style.transform = `scale(${micro}) translate(${dx}px, ${y}px) rotate(${rot}deg)`;
       });
-      title.style.filter = impact > .1 ? `brightness(${1 + impact * .5}) drop-shadow(0 0 ${impact * 26}px ${hslS(hue, .9 * act)})` : 'none';
+      title.style.filter = impact > .1 || flashK > .05 ? `brightness(${1 + impact * .5 + flashK * .4}) drop-shadow(0 0 ${(impact * 26 + flashK * 18)}px ${hslS(hue, .9 * act)})` : 'none';
     }
   }
   requestAnimationFrame(draw);

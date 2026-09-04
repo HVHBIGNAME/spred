@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Manrope:wght@400;600;700&family=Unbounded:wght@800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=38">
+  <link rel="stylesheet" href="style.css?v=39">
 </head>
 <body>
   <main class="stage" id="top">
@@ -42,14 +42,15 @@
             <a class="channel github" href="https://github.com/HVHBIGNAME" target="_blank" rel="noopener">GitHub</a>
             <a class="channel steam" href="https://steamcommunity.com/profiles/76561198278477912/" target="_blank" rel="noopener">Steam</a>
           </nav>
+          <button class="restart" id="restartBtn" type="button">повторить с начала</button>
         </div>
 
         <div class="right">
           <div class="stagebox">
             <div class="sweep" id="sweep" aria-hidden="true"></div>
-            <video id="dance" class="video" preload="auto" playsinline loop aria-label="Caramelldansen PV" src="assets/dance.mp4"></video>
+            <video id="dance" class="video" preload="auto" playsinline aria-label="Caramelldansen PV" src="assets/dance.mp4"></video>
           </div>
-          <div class="reflect" aria-hidden="true"><video class="mirror" id="mirror" muted playsinline loop src="assets/dance.mp4"></video></div>
+          <div class="reflect" aria-hidden="true"><video class="mirror" id="mirror" muted playsinline src="assets/dance.mp4"></video></div>
           <aside class="player" aria-label="Сейчас играет">
             <div class="track">Caramella Girls — Caramelldansen HD <small>(Swedish Original · 2:55 · 166.7 BPM)</small></div>
             <div class="progress-row"><span id="currentTime">0:00</span><div class="progress"><span id="progressBar"></span></div><span id="totalTime">2:55</span></div>
@@ -73,6 +74,6 @@
       <p class="gate-foot">нажмёшь — заиграет Caramelldansen · это согласие на воспроизведение медиа</p>
     </section>
   </main>
-  <script src="app.js?v=41"></script>
+  <script src="app.js?v=42"></script>
 </body>
 </html>

@@ -47,6 +47,12 @@ h1 span{animation:letter-in .7s var(--ease) both;animation-delay:calc(var(--i,0)
 h1.live span{animation:none}
 h1 span:nth-child(1){--i:0}h1 span:nth-child(2){--i:1}h1 span:nth-child(3){--i:2}
 h1 span:nth-child(4){--i:3}h1 span:nth-child(5){--i:4}
+@keyframes title-out{from{opacity:1;transform:translateY(0);filter:blur(0)}to{opacity:0;transform:translateY(calc(14px + var(--i,0) * 6px));filter:blur(8px)}}
+body.ended #title span{animation:title-out 1.3s cubic-bezier(.55,0,.9,.3) forwards;animation-delay:calc(var(--i,0) * 70ms)}
+.restart{display:none;align-items:center;justify-content:center;margin-top:18px;padding:11px 15px;border:1px solid rgba(255,255,255,.28);border-radius:2px;background:transparent;color:var(--ink);cursor:pointer;font:600 10px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;transition:border-color 150ms ease,background 150ms ease,box-shadow 150ms ease,color 150ms ease}
+body.ended .restart{display:inline-flex}
+.restart:hover{color:var(--ink);border-color:var(--pink);background:rgba(255,62,200,.08);box-shadow:0 0 18px rgba(255,62,200,.2)}
+.restart:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
 h1.punch{filter:brightness(1.6) saturate(1.2)}
 .subline{margin:0;color:var(--ink);font-size:clamp(10px,1.05vw,13px);letter-spacing:.05em;text-transform:uppercase}
 .subline i{color:var(--cyan);font-style:normal;padding:0 8px}
@@ -170,3 +176,7 @@ h1.punch{filter:brightness(1.6) saturate(1.2)}
 /* интро-хореография: на время отсчёта интерфейс скрыт, потом плавно проявляется */
 .hero{transition:opacity 1.05s ease .06s}
 body.cd .hero{opacity:0;transition:none}
+body.ended .ambient,body.ended .mglow{opacity:0!important}
+@media(max-width:1100px){
+  .restart{margin-top:14px}
+}
