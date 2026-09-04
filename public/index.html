@@ -13,30 +13,25 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Manrope:wght@400;600;700&family=Unbounded:wght@800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=10">
-  <script src="app.js?v=9" defer></script>
-  <script src="fx-show.js?v=10" defer></script>
+  <link rel="stylesheet" href="style.css?v=20">
 </head>
 <body>
   <main class="stage" id="top">
-    <video id="dance" class="video" poster="assets/poster.jpg" preload="metadata" playsinline loop aria-label="Caramelldansen PV" src="assets/dance.mp4"></video>
+    <video id="dance" class="video" poster="assets/poster.jpg" preload="auto" playsinline loop aria-label="Caramelldansen PV" src="assets/dance.mp4"></video>
     <div class="scrim" aria-hidden="true"></div>
     <canvas id="fx" aria-hidden="true"></canvas>
-    <canvas id="show" aria-hidden="true"></canvas>
-    <div class="flash" aria-hidden="true"></div>
-    <div class="glitch" aria-hidden="true"></div>
-    <div class="band" aria-hidden="true"></div>
+    <div class="wipe" aria-hidden="true"></div>
 
     <header class="topbar">
-      <span class="brand-code">СПРЕД::<b>визитка</b> v1.0</span>
+      <span class="brand-code">СПРЕД::<b>визитка</b></span>
       <div class="controls">
-        <button class="control" id="soundBtn" type="button" aria-label="Переключить звук" aria-pressed="false"><span class="control-dot"></span><span class="label-txt" id="soundLabel">звук выкл.</span></button>
-        <button class="control" id="playBtn" type="button" aria-label="Пауза или воспроизведение"><span id="playIcon">▶</span><span class="label-txt" id="playLabel">плей</span></button>
+        <button class="control" id="soundBtn" type="button" aria-label="Переключить звук" aria-pressed="false"><span class="control-dot"></span><span id="soundLabel">звук вкл.</span></button>
+        <button class="control" id="playBtn" type="button" aria-label="Пауза или воспроизведение"><span id="playIcon">❚❚</span><span id="playLabel">пауза</span></button>
       </div>
     </header>
 
     <section class="intro" aria-labelledby="title">
-      <p class="eyebrow">визитка // v1.0 // <span>caramelldansen mode: on</span></p>
+      <p class="eyebrow">визитка // <span>caramelldansen mode: on</span></p>
       <h1 id="title" aria-label="СПРЕД"><span>С</span><span>П</span><span>Р</span><span>Е</span><span>Д</span></h1>
       <p class="subline">вайбкодер <i>·</i> Rust <i>·</i> Minecraft <i>·</i> творю под бит</p>
       <p class="about">Делаю вещи, которые хочется перезапускать: низкоуровневый код, инструменты, игры. Качество &gt; количество, вайб &gt; шаблон.</p>
@@ -44,21 +39,18 @@
 
     <aside class="player" aria-label="Сейчас играет">
       <div class="player-head"><span class="mono-label">now playing</span><span class="live"><i></i> live</span></div>
-      <div class="track">Caramella Girls — Caramelldansen HD <small>(Swedish Original)</small></div>
-      <canvas id="equalizer" width="180" height="30" aria-hidden="true"></canvas>
-      <div class="progress-row"><span id="currentTime">00:00</span><div class="progress"><span id="progressBar"></span></div><span>00:15</span></div>
+      <div class="track">Caramella Girls — Caramelldansen HD <small>(Swedish Original · 2:55)</small></div>
+      <div class="progress-row"><span id="currentTime">0:00</span><div class="progress"><span id="progressBar"></span></div><span id="totalTime">2:55</span></div>
     </aside>
 
     <nav class="dock" aria-label="Ссылки">
-      <a class="channel telegram" href="https://t.me/sorryimtoobusy" target="_blank" rel="noopener"><span>01</span>Telegram</a>
-      <a class="channel discord" href="https://discord.com/users/747826362336804944" target="_blank" rel="noopener"><span>02</span>Discord</a>
-      <a class="channel github" href="https://github.com/HVHBIGNAME" target="_blank" rel="noopener"><span>03</span>GitHub</a>
-      <a class="channel steam" href="https://steamcommunity.com/profiles/76561198278477912/" target="_blank" rel="noopener"><span>04</span>Steam</a>
+      <a class="channel telegram" href="https://t.me/sorryimtoobusy" target="_blank" rel="noopener">Telegram</a>
+      <a class="channel discord" href="https://discord.com/users/747826362336804944" target="_blank" rel="noopener">Discord</a>
+      <a class="channel github" href="https://github.com/HVHBIGNAME" target="_blank" rel="noopener">GitHub</a>
+      <a class="channel steam" href="https://steamcommunity.com/profiles/76561198278477912/" target="_blank" rel="noopener">Steam</a>
     </nav>
 
-    <footer>© 2026 СПРЕД <b>·</b> собрано под 168 BPM <b>·</b> видео: Remixed Records</footer>
-
-    <!-- consent gate: пользовательский жест = права на видео+звук -->
+    <!-- consent gate: клик = разрешение на видео+звук -->
     <section class="gate" id="gate" aria-label="Включение видео">
       <div class="gate-bg" aria-hidden="true"></div>
       <div class="gate-stage">
@@ -72,12 +64,7 @@
       </div>
       <p class="gate-foot">нажмёшь — заиграет Caramelldansen · это согласие на воспроизведение медиа</p>
     </section>
-
-    <div class="ticker" aria-hidden="true">
-      <div class="ticker-in">
-        <span>♫ СПРЕД · вайбкодер · Rust · Minecraft · творю под бит · Caramelldansen 168 BPM · caramelldansen mode: on · спасибо что досмотрел до тикеров · </span><span>♫ СПРЕД · вайбкодер · Rust · Minecraft · творю под бит · Caramelldansen 168 BPM · caramelldansen mode: on · спасибо что досмотрел до тикеров · </span>
-      </div>
-    </div>
   </main>
+  <script src="app.js?v=20"></script>
 </body>
 </html>
