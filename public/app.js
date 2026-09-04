@@ -22,6 +22,7 @@
   let avgCol = [255, 62, 200];
   let audio = null, analyser = null, freq = null, audioDead = false, silenceSince = 0;
   let env = 0, kick = 0, impact = 0, shakeK = 0, transK = 0, lastRms = .3;
+  let mMotion = 0, danceS = 0, scatT = -9, scatA = 40;
   let lastSample = 0, lastLuma = 0, prevPix = null, lastCut = -9, cdShow = 0, cdT = -9, bgT = 0;
   let mouse = { x: .5, y: .5, gx: .5, gy: .5 };
   const popT = new Array(L).fill(-9), popA = new Array(L).fill(0);
@@ -92,13 +93,38 @@
     B.energy = clamp(B.energy, 0, 1);
   }
 
+  // ===== перелёт ника из центра на своё место =====
+  // Причина фикса: CSS-transition на h1 стартует от ИСХОДНОГО (identity) значения,
+  // а сброс inline через rAF ловится тем же кадром — переход запускается «из дома в дом»
+  // (см. отчёт: computed оставался identity и только через 120мс сдвигался НАЗАД).
+  // WAAPI даёт независимую от transition-состояния анимацию с гарантированным стартом.
+  let flyAnim = null;
+  function flyTitle() {
+    const hc = title.getBoundingClientRect();
+    const offX = innerWidth / 2 - (hc.left + hc.width / 2);
+    const offY = innerHeight * .46 - (hc.top + hc.height / 2);
+    title.style.transform = '';
+    if (flyAnim) { try { flyAnim.cancel(); } catch (e) {} }
+    if (reduced) return;
+    flyAnim = title.animate(
+      [
+        { transform: `translate(${offX}px, ${offY}px) scale(.93)`, offset: 0 },
+        { transform: 'translate(0px, 0px) scale(1)', offset: 1 }
+      ],
+      { duration: 1000, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'none', composite: 'replace' }
+    );
+    flyAnim.onfinish = () => { title.style.transform = ''; flyAnim = null; };
+    flyAnim.oncancel = () => { title.style.transform = ''; };
+  }
+
   async function start(muted) {
-    // отсчёт 3·2·1 → потом запуск видео (пользователь ждёт его сразу после кнопки)
+    // отсчёт 3·2·1 на тёмном фоне (интерфейс скрыт) → видео плавно проявляется, ник едет из центра вправо
     initAudio();
     try { if (audio && audio.state === 'suspended') await audio.resume(); } catch (e) {}
     gate.classList.add('is-leaving'); running = true;
     $('#soundLabel').textContent = muted ? 'звук выкл.' : 'звук вкл.';
-    video.pause();
+    video.pause(); video.classList.remove('on'); mirror.classList.remove('on');
+    document.body.classList.add('cd');
     const seq = [3, 2, 1];
     let i = 0;
     const step = () => {
@@ -106,13 +132,18 @@
         cd.textContent = String(seq[i]);
         cdShow = 1; cdT = performance.now();
         i++;
-        setTimeout(step, 800);
+        setTimeout(step, 820);
       } else {
         cdShow = 0; cd.style.opacity = '0';
+        title.style.opacity = '1';
+        document.body.classList.remove('cd');
+        title.classList.add('live');
+        // ник стартует из центра и уезжает на своё место справа (WAAPI, см. flyTitle)
+        flyTitle();
+        // видео стартует и плавно проявляется
         video.muted = muted; mirror.muted = true;
         video.currentTime = 0;
         try { video.play(); mirror.play(); } catch (e) { console.warn(e); }
-        setTimeout(() => title.classList.add('live'), 500);
       }
     };
     setTimeout(step, 500);
@@ -126,7 +157,7 @@
   });
   video.addEventListener('play', () => { $('#playIcon').textContent = '❚❚'; });
   video.addEventListener('pause', () => { $('#playIcon').textContent = '▶'; });
-  video.addEventListener('loadeddata', () => video.classList.add('ready'));
+  video.addEventListener('playing', () => { video.classList.add('on'); mirror.classList.add('on'); });
   video.addEventListener('timeupdate', () => {
     const d = video.duration || 175;
     $('#progressBar').style.width = `${video.currentTime / d * 100}%`;
@@ -171,7 +202,7 @@
     for (let i = 0; i < L; i++) { popA[i] = baseAmp; popT[i] = performance.now() + i * 24; }
     if (drop) {
       console.log('DROP@', Math.round(bt * 10) / 10);
-      transK = 1; peakFx(1);
+      transK = 1; peakFx(1); scatT = performance.now(); scatA = 34 + lastRms * 30;
       waves.push({ x: 0, y: 0, t0: performance.now(), big: 1 });
     } else if (down) {
       peakFx(.55 * strength + ramp * .3);
@@ -211,6 +242,13 @@
     }
     l /= 2304;
     if (sn) { avgCol = [sr / sn * 255, sg / sn * 255, sb / sn * 255]; }
+    if (prevPix) {
+      let d = 0;
+      for (let i = 0; i < p.length; i += 4) {
+        d += Math.abs(p[i] - prevPix[i]) + Math.abs(p[i + 1] - prevPix[i + 1]) + Math.abs(p[i + 2] - prevPix[i + 2]);
+      }
+      mMotion += ((d / (2304 * 765)) - mMotion) * .45;
+    }
     let best = -1, bv = 0;
     for (let i = 0; i < 24; i++) if (buckets[i] > bv) { bv = buckets[i]; best = i; }
     if (best >= 0) {
@@ -260,11 +298,11 @@
     // фон: реальный средний цвет кадра + акцент
     if (now - bgT > 90) {
       bgT = now;
-      ambient.style.background = `radial-gradient(55% 55% at 50% 50%, rgba(${avg},${.12 + B.energy * .1 + imp * .12 + transK * .1}), transparent 70%)`;
-      ambient.style.opacity = String(.55 * (0.4 + act));
+      ambient.style.background = `radial-gradient(55% 55% at 50% 50%, rgba(${avg},${.07 + B.energy * .06 + imp * .06 + transK * .05}), transparent 70%)`;
+      ambient.style.opacity = String(.35 * (0.4 + act));
       ambient.style.transform = `translate3d(${Math.sin(now * .00012) * 4}%, ${Math.cos(now * .00009) * 3}%, 0) scale(${1 + B.bass * .12 + imp * .18})`;
-      mglow.style.background = `radial-gradient(13% 13% at ${mouse.gx * 100}% ${mouse.gy * 100}%, rgba(${hueRgb},${.1 + B.energy * .06}), transparent 70%)`;
-      stage.style.background = `radial-gradient(120% 90% at 50% -10%, rgba(${avg},${.06 + env * .04}), #05030a 60%)`;
+      mglow.style.background = `radial-gradient(13% 13% at ${mouse.gx * 100}% ${mouse.gy * 100}%, rgba(${hueRgb},${.05 + B.energy * .03}), transparent 70%)`;
+      stage.style.background = `radial-gradient(120% 90% at 50% -10%, rgba(${avg},${.025 + env * .02}), #010104 60%)`;
       document.documentElement.style.setProperty('--acc', hslS(hue, 1));
     }
 
@@ -277,14 +315,20 @@
     const bassScale = 1 + B.bass * P.bassScale * act * .7;
     const rotZ = Math.sin(now * .0011) * .05 + imp * P.kickRot * (Math.sin(now * .01) > 0 ? 1 : -1);
     const floatX = Math.sin(now * .0006) * .12, floatY = Math.cos(now * .00045) * .1;
-    const shX = shk > .02 ? (Math.random() - .5) * P.shakeMax * shk : 0;
-    const shY = shk > .02 ? (Math.random() - .5) * P.shakeMax * shk : 0;
-    box.style.transform = `translate3d(${shX}px, ${shY + bobY}px, 0) rotateX(${rx + floatY}deg) rotateY(${ry + floatX}deg) rotateZ(${rotZ}deg) scale(${bassScale})`;
-    if (imp > .12) layout.style.transform = `translate3d(${(Math.random() - .5) * 6 * imp}px, ${(Math.random() - .5) * 5 * imp}px, 0) scale(${1 + transK * .008})`;
+    // «девочки пляшут так, что экран трясётся»: амплитуда от реального движения кадра
+    const dance = clamp((mMotion - .14) * 7, 0, 1) * act;
+    danceS += (dance - danceS) * (dance > danceS ? .25 : .02);
+    const shBase = P.shakeMax * shk + danceS * 2;
+    const shX = shBase > .15 ? (Math.random() - .5) * shBase : 0;
+    const shY = shBase > .15 ? (Math.random() - .5) * shBase : 0;
+    const rotJ = danceS > .8 ? (Math.random() - .5) * .15 : 0;
+    box.style.transform = `translate3d(${shX}px, ${shY + bobY}px, 0) rotateX(${rx + floatY}deg) rotateY(${ry + floatX}deg) rotateZ(${rotZ + rotJ}deg) scale(${bassScale})`;
+    const screenShake = imp * 6;
+    if (screenShake > .4) layout.style.transform = `translate3d(${(Math.random() - .5) * screenShake}px, ${(Math.random() - .5) * screenShake * .8}px, 0) scale(${1 + transK * .008})`;
     else layout.style.transform = transK > .01 ? `scale(${1 + transK * .008})` : '';
 
-    const glowA = (.14 + B.energy * .12 + k * .3 + imp * .3) * act;
-    box.style.boxShadow = `0 0 0 1px rgba(255,255,255,.1), 0 0 ${18 + k * 60 + imp * 130}px ${5 + k * 18 + imp * 26}px ${hslS(hue, (.25 + k * .4 + imp * .4) * act)}, 0 ${8 + imp * 20}px ${50 + k * 90}px -10px rgba(${avg},${glowA * .5})`;
+    const glowA = (.08 + B.energy * .07 + k * .2 + imp * .2) * act;
+    box.style.boxShadow = `0 0 0 1px rgba(255,255,255,.1), 0 0 ${14 + k * 42 + imp * 90}px ${4 + k * 12 + imp * 18}px ${hslS(hue, (.18 + k * .28 + imp * .28) * act)}, 0 ${6 + imp * 14}px ${38 + k * 62}px -10px rgba(${avg},${glowA * .5})`;
     mirror.style.opacity = String((.18 + B.energy * .08 + k * .15 + imp * .12) * act);
 
     ctx.clearRect(0, 0, innerWidth, innerHeight);
@@ -356,14 +400,17 @@
     }
     if (!reduced && running && title.classList.contains('live')) {
       const micro = 1 + B.bass * .005 * act;
+      const scat = (now - scatT) / 520;   // разъезд букв на дропе: 0→1 и обратно к 0
+      const scatOn = scat >= 0 && scat < 1 ? Math.sin(scat * Math.PI) : 0;
       [...title.children].forEach((el, i) => {
         const dt = now - popT[i];
-        let y = 0, rot = 0;
+        let y = 0, rot = 0, dx = 0;
         if (dt >= 0 && dt < 600) {
           const e = Math.exp(-dt / 105);
           y = -popA[i] * e; rot = popA[i] > 24 ? (i % 2 ? 1 : -1) * e * 1.6 : 0;
         }
-        el.style.transform = `scale(${micro}) translateY(${y}px) rotate(${rot}deg)`;
+        if (scatOn > 0) dx = (i - (L - 1) / 2) * scatA * scatOn * (i % 2 ? 1 : .8);
+        el.style.transform = `scale(${micro}) translate(${dx}px, ${y}px) rotate(${rot}deg)`;
       });
       title.style.filter = impact > .1 ? `brightness(${1 + impact * .5}) drop-shadow(0 0 ${impact * 26}px ${hslS(hue, .9 * act)})` : 'none';
     }
