@@ -135,3 +135,24 @@ h1.punch{filter:brightness(1.6) saturate(1.2)}
 .progress{position:relative}
 .progress .tick{position:absolute;top:-3px;width:2px;height:8px;transform:translateX(-50%);background:var(--amber);opacity:.9;
   box-shadow:0 0 6px var(--amber);border-radius:1px}
+
+/* v8: слой сцены, аура, mouse-glow, скан-рамка, широкий брейкпоинт */
+.hero{perspective:1400px}
+.stagebox{will-change:transform;transform-style:preserve-3d}
+.ambient{position:absolute;inset:-18%;z-index:0;pointer-events:none;filter:blur(64px);opacity:0;will-change:transform,opacity,background}
+.mglow{position:absolute;inset:0;z-index:0;pointer-events:none;will-change:background}
+.sweep{position:absolute;inset:0;z-index:3;pointer-events:none;border-radius:10px;padding:2px;opacity:0;
+  background:conic-gradient(from 0deg,transparent 0 28%,rgba(255,255,255,.95) 38%,var(--acc,var(--pink)) 44%,transparent 50% 100%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.sweep.on{opacity:.95;animation:sweep .6s linear}
+@keyframes sweep{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@media(max-width:1100px){
+  .hero{grid-template-columns:1fr;grid-template-rows:minmax(0,44svh) auto;gap:16px;align-content:center}
+  .right{order:-1}
+  .stagebox{max-height:44svh}
+  h1{font-size:clamp(3rem,15vw,5.6rem);justify-content:center}
+  .left{align-items:center;text-align:center}
+  .about{margin-left:auto;margin-right:auto}
+  .dock{justify-content:center}
+  .eyebrow{text-align:center}
+}

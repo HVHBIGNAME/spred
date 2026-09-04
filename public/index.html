@@ -12,10 +12,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Manrope:wght@400;600;700&family=Unbounded:wght@800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=32">
+  <link rel="stylesheet" href="style.css?v=33">
 </head>
 <body>
   <main class="stage" id="top">
+    <div class="ambient" id="ambient" aria-hidden="true"></div>
+    <div class="mglow" id="mglow" aria-hidden="true"></div>
     <canvas id="fx" aria-hidden="true"></canvas>
     <div class="cd" id="cd" aria-hidden="true"></div>
 
@@ -44,6 +46,7 @@
 
         <div class="right">
           <div class="stagebox">
+            <div class="sweep" id="sweep" aria-hidden="true"></div>
             <video id="dance" class="video" poster="assets/poster.jpg" preload="auto" playsinline loop aria-label="Caramelldansen PV" src="assets/dance.mp4"></video>
           </div>
           <div class="reflect" aria-hidden="true"><video class="mirror" id="mirror" muted playsinline loop src="assets/dance.mp4"></video></div>
@@ -70,6 +73,6 @@
       <p class="gate-foot">нажмёшь — заиграет Caramelldansen · это согласие на воспроизведение медиа</p>
     </section>
   </main>
-  <script src="app.js?v=34"></script>
+  <script src="app.js?v=35"></script>
 </body>
 </html>
