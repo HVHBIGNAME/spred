@@ -15,20 +15,23 @@
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Manrope:wght@400;600;700&family=Unbounded:wght@800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <script src="app.js" defer></script>
+  <script src="fx-show.js" defer></script>
 </head>
 <body>
   <main class="stage" id="top">
     <video id="dance" class="video" poster="assets/poster.jpg" preload="metadata" playsinline loop aria-label="Caramelldansen PV" src="assets/dance.mp4"></video>
-    <canvas id="fx" aria-hidden="true"></canvas>
     <div class="scrim" aria-hidden="true"></div>
-    <div class="glitch" aria-hidden="true"></div>
+    <canvas id="fx" aria-hidden="true"></canvas>
+    <canvas id="show" aria-hidden="true"></canvas>
     <div class="flash" aria-hidden="true"></div>
+    <div class="glitch" aria-hidden="true"></div>
+    <div class="band" aria-hidden="true"></div>
 
     <header class="topbar">
       <span class="brand-code">СПРЕД::<b>визитка</b> v1.0</span>
       <div class="controls">
-        <button class="control" id="soundBtn" type="button" aria-label="Включить звук" aria-pressed="false"><span class="control-dot"></span><span id="soundLabel">звук выкл.</span></button>
-        <button class="control" id="playBtn" type="button" aria-label="Включить видео"><span id="playIcon">▶</span><span id="playLabel">плей</span></button>
+        <button class="control" id="soundBtn" type="button" aria-label="Переключить звук" aria-pressed="false"><span class="control-dot"></span><span class="label-txt" id="soundLabel">звук выкл.</span></button>
+        <button class="control" id="playBtn" type="button" aria-label="Пауза или воспроизведение"><span id="playIcon">▶</span><span class="label-txt" id="playLabel">плей</span></button>
       </div>
     </header>
 
@@ -42,7 +45,7 @@
     <aside class="player" aria-label="Сейчас играет">
       <div class="player-head"><span class="mono-label">now playing</span><span class="live"><i></i> live</span></div>
       <div class="track">Caramella Girls — Caramelldansen HD <small>(Swedish Original)</small></div>
-      <canvas id="equalizer" width="180" height="34" aria-hidden="true"></canvas>
+      <canvas id="equalizer" width="180" height="30" aria-hidden="true"></canvas>
       <div class="progress-row"><span id="currentTime">00:00</span><div class="progress"><span id="progressBar"></span></div><span>00:15</span></div>
     </aside>
 
@@ -55,16 +58,19 @@
 
     <footer>© 2026 СПРЕД <b>·</b> собрано под 168 BPM <b>·</b> видео: Remixed Records</footer>
 
-    <section class="gate" id="gate" aria-labelledby="gateTitle">
+    <!-- consent gate: пользовательский жест = права на видео+звук -->
+    <section class="gate" id="gate" aria-label="Включение видео">
       <div class="gate-bg" aria-hidden="true"></div>
-      <div class="gate-inner">
+      <div class="gate-stage">
         <p class="eyebrow">audio / visual introduction</p>
-        <h2 id="gateTitle">СПРЕД</h2>
+        <h2>СПРЕД</h2>
         <p class="gate-sub">включи вайб</p>
-        <button class="start" id="startSound" type="button">▶&nbsp; Включить видео со звуком</button>
+        <button class="play-circle" id="startSound" type="button" aria-label="Включить видео со звуком">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l13-7.5-13-7.5z"/></svg>
+        </button>
         <button class="silent" id="startSilent" type="button">тихо, без звука</button>
-        <p class="disclaimer">нажмёшь — заиграет Caramelldansen.<br>Ты соглашаешься на воспроизведение медиа.</p>
       </div>
+      <p class="gate-foot">нажмёшь — заиграет Caramelldansen · это согласие на воспроизведение медиа</p>
     </section>
   </main>
 </body>
