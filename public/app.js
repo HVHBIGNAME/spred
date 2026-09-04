@@ -4,7 +4,8 @@
   const $ = s => document.querySelector(s);
   const video = $('#dance'), mirror = $('#mirror'), box = $('.stagebox');
   const fx = $('#fx'), ctx = fx.getContext('2d');
-  const gate = $('#gate'), title = $('#title'), band = $('.band');
+  const gate = $('#gate'), title = $('#title'), cd = $('#cd'), stage = document.querySelector('.stage');
+  let cdT = -9, cdShow = 0, bgT = 0;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const L = 5; // букв в нике
 
@@ -15,7 +16,7 @@
   let ramp = 0, hot = 0;               // разгон (0..1) и посвечение после дропа
   let lastSample = 0, lastLuma = 0, prevPix = null, lastCut = -9;
   let audio = null;
-  const sparks = [], waves = [];
+  const sparks = [], waves = [], irises = [];
   const popT = new Array(L).fill(-9), popA = new Array(L).fill(0);
   const cam = document.createElement('canvas'); cam.width = 48; cam.height = 27;
   const camX = cam.getContext('2d', { willReadFrequently: true });
@@ -31,6 +32,8 @@
   fetch('assets/timeline.json').then(r => r.json()).then(t => {
     TL = t; downSet = new Set(t.downs); dropSet = new Set(t.drops);
     console.log('timeline', t.bpm, 'bpm /', t.count, 'beats / drops', t.drops.length);
+    const pr = document.querySelector('.progress');
+    if (pr && t.drops) t.drops.forEach(d => { const el = document.createElement('i'); el.className = 'tick'; el.style.left = (t.beats[d][0] / t.duration * 100) + '%'; pr.appendChild(el); });
   }).catch(() => {});
 
   function initAudio() { if (audio) return; try { audio = new AudioContext(); const s = audio.createMediaElementSource(video); s.connect(audio.destination); } catch (e) {} }
@@ -71,7 +74,14 @@
       if (drop) { ramp = 0; hot = 1; }
     }
     kick = 1;
-    if (drop) console.log("DROP@", Math.round(bt*10)/10, "beat", idx);
+    if (drop) console.log('DROP@', Math.round(bt * 10) / 10, 'beat', idx);
+    if (TL) {
+      const nextDrop = TL.drops.find(dd => dd >= idx);
+      if (nextDrop) {
+        const left = nextDrop - idx;
+        if (left >= 1 && left <= 3) { cd.textContent = String(left); cdT = performance.now(); cdShow = 1; }
+      }
+    }
     const amp = drop ? 1.35 : down ? 1 : .62 * (.4 + p);
     punchK = Math.max(punchK, drop ? 1 : down ? .55 : .25);
     if (reduced || !running) return;
@@ -132,8 +142,8 @@
     prevTarget = targetHue;
     if ((jump || hueJump) && now - lastCut > 900) {
       lastCut = now;
-      band.style.color = hslS(hue); band.style.background = hslS(hue);
-      band.classList.remove('run'); void band.offsetWidth; band.classList.add('run');
+      const bb = box.getBoundingClientRect();
+      irises.push({ x: bb.left + bb.width / 2, y: bb.top + bb.height / 2, t0: now, hue });
     }
     prevPix = p; lastLuma = l;
   }
@@ -155,6 +165,24 @@
 
     ctx.clearRect(0, 0, innerWidth, innerHeight);
     sample(now);
+    if (now - bgT > 100) { bgT = now; stage.style.background = `radial-gradient(120% 90% at 50% -10%, rgba(${rgb},${.09 + env * .07}), #05030a 62%)`; }
+    if (cdShow) {
+      const cdt = now - cdT;
+      if (cdt < 700) {
+        const s2 = 1 + .25 * Math.sin(Math.min(cdt / 700, 1) * Math.PI);
+        cd.style.opacity = String(1 - cdt / 700);
+        cd.style.transform = `translate(-50%,-50%) scale(${s2})`;
+        cd.style.color = hslS(hue); cd.style.textShadow = `0 0 40px ${hslS(hue, .8)}`;
+      } else { cdShow = 0; cd.style.opacity = '0'; }
+    }
+    for (let i = irises.length - 1; i >= 0; i--) {
+      const ir = irises[i]; const pr = (now - ir.t0) / 320;
+      if (pr >= 1) { irises.splice(i, 1); continue; }
+      const rr = Math.max(innerWidth, innerHeight) * (0.05 + pr);
+      const g2 = ctx.createRadialGradient(ir.x, ir.y, 0, ir.x, ir.y, rr);
+      g2.addColorStop(0, `rgba(${rgbOf(ir.hue)},${.16 * (1 - pr)})`); g2.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = g2; ctx.beginPath(); ctx.arc(ir.x, ir.y, rr, 0, 6.283); ctx.fill();
+    }
     if (flashK > .02) {
       const fa = flashK * .2;
       const gg = ctx.createRadialGradient(innerWidth * .5, innerHeight * .55, 0, innerWidth * .5, innerHeight * .55, innerWidth * .8);
@@ -199,11 +227,9 @@
         const dt = now - popT[i];
         if (dt >= 0 && dt < 600) {
           const e = Math.exp(-dt / 110);
-          const bounce = Math.sin(Math.min(dt / 600, 1) * Math.PI);
-          const y = -popA[i] * e * (1 + .3 * (1 - bounce));
-          const rot = (i % 2 ? 1 : -1) * popA[i] * .055 * e;
-          el.style.transform = `translateY(${y}px) rotate(${rot}deg)`;
-        } else el.style.transform = 'translateY(0) rotate(0deg)';
+          const rot = popA[i] > 28 ? (i % 2 ? 1 : -1) * .06 * e * popA[i] * .5 : 0;
+          el.style.transform = `translateY(${-popA[i] * e}px) rotate(${rot}deg)`;
+        } else el.style.transform = 'translateY(0px) rotate(0deg)';
       });
       title.style.filter = punchK > .03 ? `brightness(${1 + punchK * .7}) drop-shadow(0 ${punchK * 4}px ${punchK * 30}px ${hslS(hue, .9)})` : 'none';
     }
