@@ -6,51 +6,56 @@
   <title>СПРЕД — визитка</title>
   <meta name="description" content="СПРЕД — вайбкодер. Низкоуровневый код, инструменты и игры, собранные под бит.">
   <meta property="og:title" content="СПРЕД — визитка">
-  <meta property="og:description" content="Вайбкодер · Rust · Minecraft · творю под бит">
   <meta property="og:image" content="assets/poster.jpg">
   <meta name="theme-color" content="#07050d">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%2307050d'/%3E%3Cpath d='M45 17c-4-4-9-6-15-6-11 0-19 8-19 21s8 21 19 21c6 0 11-2 15-6l-6-7c-2 2-5 3-8 3-6 0-10-4-10-11s4-11 10-11c3 0 6 1 8 3z' fill='%23ff3ec8'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Manrope:wght@400;600;700&family=Unbounded:wght@800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=20">
+  <link rel="stylesheet" href="style.css?v=31">
 </head>
 <body>
   <main class="stage" id="top">
-    <video id="dance" class="video" poster="assets/poster.jpg" preload="auto" playsinline loop aria-label="Caramelldansen PV" src="assets/dance.mp4"></video>
-    <div class="scrim" aria-hidden="true"></div>
     <canvas id="fx" aria-hidden="true"></canvas>
-    <div class="wipe" aria-hidden="true"></div>
+    <div class="band" aria-hidden="true"></div>
 
-    <header class="topbar">
-      <span class="brand-code">СПРЕД::<b>визитка</b></span>
-      <div class="controls">
-        <button class="control" id="soundBtn" type="button" aria-label="Переключить звук" aria-pressed="false"><span class="control-dot"></span><span id="soundLabel">звук вкл.</span></button>
-        <button class="control" id="playBtn" type="button" aria-label="Пауза или воспроизведение"><span id="playIcon">❚❚</span><span id="playLabel">пауза</span></button>
-      </div>
-    </header>
+    <div class="layout">
+      <header class="topbar">
+        <span class="brand-code">СПРЕД::<b>визитка</b></span>
+        <div class="controls">
+          <button class="control" id="soundBtn" type="button" aria-label="Переключить звук" aria-pressed="false"><span class="control-dot"></span><span id="soundLabel">звук вкл.</span></button>
+          <button class="control" id="playBtn" type="button" aria-label="Пауза или воспроизведение"><span id="playIcon">❚❚</span><span id="playLabel">пауза</span></button>
+        </div>
+      </header>
 
-    <section class="intro" aria-labelledby="title">
-      <p class="eyebrow">визитка // <span>caramelldansen mode: on</span></p>
-      <h1 id="title" aria-label="СПРЕД"><span>С</span><span>П</span><span>Р</span><span>Е</span><span>Д</span></h1>
-      <p class="subline">вайбкодер <i>·</i> Rust <i>·</i> Minecraft <i>·</i> творю под бит</p>
-      <p class="about">Делаю вещи, которые хочется перезапускать: низкоуровневый код, инструменты, игры. Качество &gt; количество, вайб &gt; шаблон.</p>
-    </section>
+      <section class="hero">
+        <div class="left">
+          <p class="eyebrow">визитка // <span>caramelldansen mode: on</span></p>
+          <h1 id="title" aria-label="СПРЕД"><span>С</span><span>П</span><span>Р</span><span>Е</span><span>Д</span></h1>
+          <p class="subline">вайбкодер <i>·</i> Rust <i>·</i> Minecraft <i>·</i> творю под бит</p>
+          <p class="about">Делаю вещи, которые хочется перезапускать: низкоуровневый код, инструменты, игры. Качество &gt; количество, вайб &gt; шаблон.</p>
+          <nav class="dock" aria-label="Ссылки">
+            <a class="channel telegram" href="https://t.me/sorryimtoobusy" target="_blank" rel="noopener">Telegram</a>
+            <a class="channel discord" href="https://discord.com/users/747826362336804944" target="_blank" rel="noopener">Discord</a>
+            <a class="channel github" href="https://github.com/HVHBIGNAME" target="_blank" rel="noopener">GitHub</a>
+            <a class="channel steam" href="https://steamcommunity.com/profiles/76561198278477912/" target="_blank" rel="noopener">Steam</a>
+          </nav>
+        </div>
 
-    <aside class="player" aria-label="Сейчас играет">
-      <div class="player-head"><span class="mono-label">now playing</span><span class="live"><i></i> live</span></div>
-      <div class="track">Caramella Girls — Caramelldansen HD <small>(Swedish Original · 2:55)</small></div>
-      <div class="progress-row"><span id="currentTime">0:00</span><div class="progress"><span id="progressBar"></span></div><span id="totalTime">2:55</span></div>
-    </aside>
+        <div class="right">
+          <div class="stagebox">
+            <video id="dance" class="video" poster="assets/poster.jpg" preload="auto" playsinline loop aria-label="Caramelldansen PV" src="assets/dance.mp4"></video>
+          </div>
+          <div class="reflect" aria-hidden="true"><video class="mirror" id="mirror" muted playsinline loop src="assets/dance.mp4"></video></div>
+          <aside class="player" aria-label="Сейчас играет">
+            <div class="track">Caramella Girls — Caramelldansen HD <small>(Swedish Original · 2:55 · 166.7 BPM)</small></div>
+            <div class="progress-row"><span id="currentTime">0:00</span><div class="progress"><span id="progressBar"></span></div><span id="totalTime">2:55</span></div>
+          </aside>
+        </div>
+      </section>
+    </div>
 
-    <nav class="dock" aria-label="Ссылки">
-      <a class="channel telegram" href="https://t.me/sorryimtoobusy" target="_blank" rel="noopener">Telegram</a>
-      <a class="channel discord" href="https://discord.com/users/747826362336804944" target="_blank" rel="noopener">Discord</a>
-      <a class="channel github" href="https://github.com/HVHBIGNAME" target="_blank" rel="noopener">GitHub</a>
-      <a class="channel steam" href="https://steamcommunity.com/profiles/76561198278477912/" target="_blank" rel="noopener">Steam</a>
-    </nav>
-
-    <!-- consent gate: клик = разрешение на видео+звук -->
+    <!-- consent gate -->
     <section class="gate" id="gate" aria-label="Включение видео">
       <div class="gate-bg" aria-hidden="true"></div>
       <div class="gate-stage">
@@ -65,6 +70,6 @@
       <p class="gate-foot">нажмёшь — заиграет Caramelldansen · это согласие на воспроизведение медиа</p>
     </section>
   </main>
-  <script src="app.js?v=20"></script>
+  <script src="app.js?v=32"></script>
 </body>
 </html>
